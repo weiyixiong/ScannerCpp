@@ -33,26 +33,10 @@ bool Scanner::isChar(char target) {
 	return (_nextChar >= 'A' && _nextChar <= 'Z')
 			|| (_nextChar >= 'a' && _nextChar <= 'z');
 }
-void Scanner::ConvertUtf8ToGBK(const char * strUtf8) {
-	int len = MultiByteToWideChar(CP_UTF8, 0, (LPCTSTR) strUtf8, -1, NULL, 0);
-	wchar_t * wszGBK = new wchar_t[len];
-	memset(wszGBK, 0, len);
-	MultiByteToWideChar(CP_UTF8, 0, (LPCTSTR) strUtf8, -1, wszGBK, len);
-
-	len = WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, NULL, 0, NULL, NULL);
-	char *szGBK = new char[len + 1];
-	memset(szGBK, 0, len + 1);
-	WideCharToMultiByte(CP_ACP, 0, wszGBK, -1, szGBK, len, NULL, NULL);
-
-	strUtf8 = szGBK;
-	delete[] szGBK;
-	delete[] wszGBK;
-}
 Token* Scanner::produce() {
 	if (!_nextChar) {
 		return new Token(COMPLETE, NULL);
 	}
-	readNextChar();
 	switch (_nextChar) {
 	case ' ':
 		readNextChar();
@@ -85,10 +69,10 @@ Token* Scanner::produce() {
 		return new Token(STRING_LITERAL, sb->c_str());
 	}
 		break;
-	default:
+//	default:
 //		readNextChar();
 //		return new Token(SPACE, NULL);
-		break;
+//		break;
 	}
 	std::string *sb = new string();
 	if (isChar(_nextChar)) {
@@ -97,16 +81,18 @@ Token* Scanner::produce() {
 			readNextChar();
 		}
 		if (keywords[sb->c_str()]) {
-			return new Token((Type) keywords[sb->c_str()], sb->c_str());
+			return new Token((Type) keywords[sb->c_str()], NULL);
 		} else {
-			return new Token(UNKNOW, sb->c_str());
+			return new Token(UNKNOW, NULL);
 		}
+	} else {
+		while (_nextChar && (_nextChar) != '<') {
+			sb->push_back(_nextChar);
+			readNextChar();
+		}
+		//	ConvertUtf8ToGBK(sb->c_str());
+		return new Token(TEXT, sb->c_str());
 	}
-	while ((_nextChar) != '<') {
-		sb->push_back(_nextChar);
-		readNextChar();
-	}
-//	ConvertUtf8ToGBK(sb->c_str());
-	return new Token(TEXT, sb->c_str());
+
 }
 } /* namespace Scanner */

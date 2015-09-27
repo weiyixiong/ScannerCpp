@@ -18,12 +18,8 @@ public:
 	Parser();
 	virtual ~Parser();
 	vector<Token*> *parseHTML(const char *code);
-	void peek();
-	Token *peekButOne();
 	void read();
 	void deleteToken();
-	void readNext(bool isDelete);
-	bool peek(Type type);
 	bool read(Type type);
 private:
 	Token *_nextToken;
